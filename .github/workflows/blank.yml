@@ -1,0 +1,77 @@
+import re
+from PIL import Image
+import pytesseract
+import sys
+from pdf2image import convert_from_path
+import os
+def Propor():
+
+    pages = convert_from_path(PDF_file, 500)
+    image_counter = 1
+    for page in pages:
+        filename = "page_"+str(image_counter)+".jpg"
+        page.save(filename, 'JPEG')
+        image_counter = image_counter + 1
+    filelimit = image_counter-1
+    outfile = "out_text.txt"
+    f = open(outfile, "a")
+    for i in range(1, filelimit + 1):
+        filename = "page_"+str(i)+".jpg"
+        text = str(((pytesseract.image_to_string(Image.open(filename)))))
+        text = text.replace('-\n', '')
+        f.write(text)
+    f.close()
+    print(text)
+    ReCNPJ = re.compile(r'''(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}-\d{2})''')
+#Verificar de quem é o CNPJ
+    ACNPJ = ReCNPJ.search(text)
+    CNPJ = ACNPJ.group()
+    print(CNPJ)
+    def get_key(val):
+        global CNPJ
+        for key, value in Empresas.items():
+            if len(value) < 8 :
+                for i in range(len(value)):
+                 if val == value[i]:
+                     return key
+            if val == value:
+                 return key
+    Empresa = get_key(CNPJ)
+    print(Empresa)
+#Parte do mês
+    ReMes = re.compile(r'''(\s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro) (a \s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)?''', re.I)
+    AMes = ReMes.search(text)
+    print(AMes.group(1))
+    Mes = (AMes.group(1))
+    if Mes.capitalize() in MesesDoAno:
+        if Mes.capitalize() == 'MarÇo':
+            Mes = '2'
+        else:
+            Mes = MesesDoAno.index(Mes.capitalize())+1
+        if len(str(Mes)) != 2:
+            Mes = '0'+str(Mes)
+    else:
+        ReMes = re.compile(r'''(\d{2})''')
+        AMes= ReMes.search(str(Mes))
+        Mes = AMes.group(1)
+
+#Parte do dinheiro
+    ReDinheiro = re.compile(r'''(\d*?\.?\d+,\d{1,2})''')
+    ADinheiro = ReDinheiro.findall(text)
+    Dinheiro1 = ADinheiro[0]
+    Dinheiro2 = ADinheiro[1]
+    if int(Dinheiro1) > int(Dinheiro2):
+        Salario = Dinheiro1
+    else:
+        INSS = Dinheiro2
+    print('INSS:'+ INSS +' Salario:' + Salario)
+#Escrever as informações e salvar
+#Executar o codigo
+for i in range(5):
+    PDF_file = "C:\Teste"+str(i)+".pdf"
+    print('Teste'+str(i))
+    Propor()
+
+#Erros conhecidos
+#Não consegue processar BP
+#Fundação JOSE precisa de regra especial pra o mês
