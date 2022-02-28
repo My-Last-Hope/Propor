@@ -22,7 +22,7 @@ while True:
 arquivos = message.Attachments
 arquivo = arquivos.item(1)
 NomeDoArquivo = str(arquivo).lower()
-arquivo.SaveASFile(path(MUDAR)+ '\\' + NomeDoArquivo)
+arquivo.SaveASFile(ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS+ '\\' + NomeDoArquivo)
     
 def Propor():
 
@@ -87,9 +87,10 @@ def Propor():
     print('INSS:'+ INSS +' Salario:' + Salario)
 #Escrever as informações e salvar
 #Executar o codigo
-for i in range(5):
-    PDF_file = "C:\Teste"+str(i)+".pdf"
-    print('Teste'+str(i))
+Pasta = os.listdir(ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS) 
+for i in Pasta:
+    PDF_file = "C:\\str(i)+".pdf"
+    print('Teste')
     Propor()
 
 #Erros conhecidos
