@@ -4,6 +4,26 @@ import pytesseract
 import sys
 from pdf2image import convert_from_path
 import os
+import win32com.client
+pessoa = ''
+def LerESalvaremail():
+    global pessoa
+outlook = win32com.client.Dispatch("Outlook.Application").GeNamespace("MAPI")
+inbox = outlook.GetDefaulFolder(MUDAR).folders("Mudar")
+mensagens = inbox.Items
+mensagem = messages.GetFirst()
+while True:
+  try:
+     print(message.subject)
+     mensagem = messages.GetNext()
+     email = message.SenderEmailAddress
+  except:
+     mensagem = messages.GetNext()
+arquivos = message.Attachments
+arquivo = arquivos.item(1)
+NomeDoArquivo = str(arquivo).lower()
+arquivo.SaveASFile(path(MUDAR)+ '\\' + NomeDoArquivo)
+    
 def Propor():
 
     pages = convert_from_path(PDF_file, 500)
