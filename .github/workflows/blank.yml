@@ -1,63 +1,109 @@
+# Escreva o seu código aqui :-)
+# Escreva o seu código aqui :-)
 import re
 from PIL import Image
 import pytesseract
 import sys
 from pdf2image import convert_from_path
+import glob
 import os
 import win32com.client
 pessoa = ''
+outlook=win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+inbox = outlook.Folders('Proporcionalidade INSS').Folders[10]
+messages = inbox.Items
+message = messages.GetFirst()
 def LerESalvaremail():
-    global pessoa
-outlook = win32com.client.Dispatch("Outlook.Application").GeNamespace("MAPI")
-inbox = outlook.GetDefaulFolder(MUDAR).folders("Mudar")
-mensagens = inbox.Items
-mensagem = messages.GetFirst()
-while True:
-  try:
-     print(message.subject)
-     mensagem = messages.GetNext()
-     email = message.SenderEmailAddress
-  except:
-     mensagem = messages.GetNext()
-arquivos = message.Attachments
-arquivo = arquivos.item(1)
-NomeDoArquivo = str(arquivo).lower()
-arquivo.SaveASFile(ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS+ '\\' + NomeDoArquivo)
-    
-def Propor():
+    global inbox, message, messages
+    while True:
+        try:
+            message = messages.GetNext()
+            arquivos = message.Attachments
+            arquivo = arquivos.item(1)
+            NomeDoArquivo = str(arquivo).lower()
+            arquivo.SaveASFile(r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + NomeDoArquivo)
+            old_name = (r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + NomeDoArquivo)
+            new_name = (r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + str(message.sender) + ' Tipo de arquivo ' + NomeDoArquivo)
+            os.rename(old_name, new_name)
+        except:
+            message = messages.GetNext()
+        if message == None:
+            return False
 
-    pages = convert_from_path(PDF_file, 500)
-    image_counter = 1
-    for page in pages:
-        filename = "page_"+str(image_counter)+".jpg"
-        page.save(filename, 'JPEG')
-        image_counter = image_counter + 1
-    filelimit = image_counter-1
-    outfile = "out_text.txt"
-    f = open(outfile, "a")
-    for i in range(1, filelimit + 1):
-        filename = "page_"+str(i)+".jpg"
-        text = str(((pytesseract.image_to_string(Image.open(filename)))))
-        text = text.replace('-\n', '')
-        f.write(text)
-    f.close()
-    print(text)
+
+MesesDoAno = ['Janeiro' , 'Fevereiro' , 'Março', 'Abril' , 'Maio' , 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro','MarÇo']
+Empresas = {'AACD':'60.979.45/0001-11', 'ALBERT EINSTEIN': '60.765.823/0001-30', 'AMIL ASS MEDICA': '29.309.127/0184-69','BP':'61.599.908/0001-58'
+,'CENTRO DE ESTUDOS E PESQUISAS DR JOÃO AMORIM':'66.518.267/0008-50','ESHO':['29.435.005/0026-87', '29.435.005/0045-40']
+,'ESHO EMPR SERV HOSPITAL /SAMARITANO SP':'29.435.005/0099-32','FIDI': '55.401.178/0012-99','FLEURY': 'S/A:60.840.055/0150-82'
+,'FUND. ADIB JATENE':'53.725.560/0001-70','FUNDAÇÃO FACULDADE MEDICINA':'56.577.059/0006-06','FUNDACAO JOSE LUIZ EGYDIO SETUBAL':'61.213.674/0002-40'
+,'Fundação Zerbini':'50.644.053/0001-13','HAT HOSP ALV TAGUATINGA':'08.100.676/0024-55','HCOR':'60.453.024/0003-90'
+,'HOSP. ALVORADA TAGUATINGA':'108.100.676/0024-55','HOSP. MARIO COVAS': '157.571.275/0006-07','Hospital das clinicas':'160.448.040/0001-22'
+,'HOSPITAL SIRIO LIBANÊS':'61.590.410/0001-24','HRIM':'52.803.319/0001-59','IAMSPE':'60.747.318/0001-62','IBCC': '62.932.942/0001-65'
+,'IGESP':'61.442.190/0001-91','IMPAR SERVICOS': '60.884.855/0003-16','INSTITUTO BRASIL SAUDE': '60.884.855/0003-16'
+,'INSTITUTO NACIONAL DE TECNOLOGIA E SAUDE':'09.652.823/0013-00'
+,'Leforte':'21.371.777/0001-32'
+,'NOTRE DAME INTERMEDICA SAUDE S.A.':'44.649.812/0001-38'
+,'REDE D’OR':'28.290.788/0001-37'
+,'OSEL':'18.301.267/0007-70'
+,'PREVENT SENIOR':['00.461.479/0094-62','00.461.479/0010-54']
+,'REDE D’OR SÃO LUIZ S/A':['06.047.087/0038-20','06.047.087/0003-09','28.290.788/0001-37']
+,'SAMARITANO':'29.435.005/0099-32',
+'SANTA CATARINA':'60.922.168/0007-71',
+'Santa Marcelina':'60.742.855/0017-87',
+'São luiz': '06.047.087/0003-09',
+'SECONCI':'61.687.356/0040-46',
+'Sirio':'61.590.410.0001-24',
+'SPDM':['61.699.567/0062-04','61 699 567/0057-47', '61 699 567/ 0057-47'],
+'Zerbini':'50.644.053/0001-13'}
+
+#Baixar os anexos do email
+
+#Mudar para pasta respondidos
+
+#Pegar as informações da imagem SE o arquivo for um PDF
+
+
+def Propor():
+    try:
+        pages = convert_from_path(PDF_file, 500)
+        image_counter = 1
+        for page in pages:
+            filename = "page_"+str(image_counter)+".jpg"
+            page.save(filename, 'JPEG')
+            image_counter = image_counter + 1
+        filelimit = image_counter-1
+        outfile = "out_text.txt"
+        f = open(outfile, "a")
+        for i in range(1, filelimit + 1):
+            filename = "page_"+str(i)+".jpg"
+            text = str(((pytesseract.image_to_string(Image.open(filename)))))
+            text = text.replace('-\n', '')
+            f.write(text)
+        f.close()
+        print(text)
+    except ValueError:
+        print('Error: ValueError Arquivo:' + PDF_file)
+    
+    print('-------------------------------------------')
     ReCNPJ = re.compile(r'''(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}-\d{2})''')
 #Verificar de quem é o CNPJ
     ACNPJ = ReCNPJ.search(text)
-    CNPJ = ACNPJ.group()
-    print(CNPJ)
-    def get_key(val):
-        global CNPJ
-        for key, value in Empresas.items():
-            if len(value) < 8 :
-                for i in range(len(value)):
-                 if val == value[i]:
+    if ACNPJ != None:
+        CNPJ = ACNPJ.group()
+        print(CNPJ)
+        def get_key(val):
+            global CNPJ
+            for key, value in Empresas.items():
+                if len(value) < 8 :
+                    for i in range(len(value)):
+                     if val == value[i]:
+                         return key
+                if val == value:
                      return key
-            if val == value:
-                 return key
-    Empresa = get_key(CNPJ)
-    print(Empresa)
+        Empresa = get_key(CNPJ)
+        print(Empresa)
+    else:
+        print('Erro CNPJ')
 #Parte do mês
     ReMes = re.compile(r'''(\s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro) (a \s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)?''', re.I)
     AMes = ReMes.search(text)
@@ -78,19 +124,35 @@ def Propor():
 #Parte do dinheiro
     ReDinheiro = re.compile(r'''(\d*?\.?\d+,\d{1,2})''')
     ADinheiro = ReDinheiro.findall(text)
-    Dinheiro1 = ADinheiro[0]
-    Dinheiro2 = ADinheiro[1]
-    if int(Dinheiro1) > int(Dinheiro2):
-        Salario = Dinheiro1
+    if ADinheiro == []:
+        print('Teto maximo')
     else:
-        INSS = Dinheiro2
-    print('INSS:'+ INSS +' Salario:' + Salario)
+        DinheiroRE1 = re.compile(r'\.')
+        DinheiroRE2 = re.compile(r',')
+        Dinheiro1 = DinheiroRE1.sub('' , ADinheiro[0])
+        Dinheiro2 = DinheiroRE1.sub('' , ADinheiro[1])
+        Dinheiro1 = DinheiroRE2.sub('.' , Dinheiro1)
+        Dinheiro2 = DinheiroRE2.sub('.' , Dinheiro2)
+        print(Dinheiro1 +' '+ Dinheiro2)
+        if int(float(Dinheiro1)) > int(float(Dinheiro2)):
+            Salario = Dinheiro1
+            INSS = Dinheiro2
+        else:
+            Salario = Dinheiro2
+            INSS = Dinheiro1
+        print('INSS:'+ INSS +' Salario:' + Salario)
+    print('-------------------------------------------')
 #Escrever as informações e salvar
 #Executar o codigo
-Pasta = os.listdir(ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS) 
-for i in Pasta:
-    PDF_file = "C:\\str(i)+".pdf"
-    print('Teste')
+print('-------------------------------------------')
+pdffiles = []
+for file in glob.glob(r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS\*.pdf"):
+    pdffiles.append(file)
+teste = 0 
+for i in pdffiles:
+    PDF_file = i
+    teste += 1
+    print('Teste'+str(teste))
     Propor()
 
 #Erros conhecidos
