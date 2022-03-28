@@ -8,153 +8,282 @@ from pdf2image import convert_from_path
 import glob
 import os
 import win32com.client
-pessoa = ''
-outlook=win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.Folders('Proporcionalidade INSS').Folders[10]
+import openpyxl
+
+os.chdir(
+    r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+)
+wb = openpyxl.load_workbook("lista.xlsx")
+# Abrir o inbox
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+inbox = outlook.Folders("Proporcionalidade INSS").Folders[12]
 messages = inbox.Items
+print(messages)
 message = messages.GetFirst()
-def LerESalvaremail():
-    global inbox, message, messages
+NumeroDeArquivos = 0
+NumeroDeEmails = 1
+wb = openpyxl.load_workbook("lista.xlsx")
+sheet = wb.active
+EEmpresa = sheet.cell(row=1, column=1)
+EEmpresa.value = "Empresa"
+ECNPJ = sheet.cell(row=1, column=2)
+ECNPJ.value = "CNPJ"
+ENome = sheet.cell(row=1, column=3)
+ENome.value = "Nome"
+ESalario = sheet.cell(row=1, column=4)
+ESalario.value = "Salario"
+EINSS = sheet.cell(row=1, column=5)
+EINSS.value = "INSS"
+# Baixar os anexos do email
+def LerESalvarEmail():
+    global inbox, message, messages, teste, PDF_file
     while True:
         try:
             message = messages.GetNext()
             arquivos = message.Attachments
             arquivo = arquivos.item(1)
             NomeDoArquivo = str(arquivo).lower()
-            arquivo.SaveASFile(r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + NomeDoArquivo)
-            old_name = (r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + NomeDoArquivo)
-            new_name = (r'C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS' + '\\' + str(message.sender) + ' Tipo de arquivo ' + NomeDoArquivo)
+            arquivo.SaveASFile(
+                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                + "\\"
+                + NomeDoArquivo
+            )
+            old_name = (
+                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                + "\\"
+                + NomeDoArquivo
+            )
+            new_name = (
+                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                + "\\"
+                + str(message.sender)
+                + " Tipo de arquivo "
+                + NomeDoArquivo
+            )
             os.rename(old_name, new_name)
         except:
             message = messages.GetNext()
-        if message == None:
+        if message is None:
             return False
+        PDF_file = new_name
+        teste += 1
+        print("Teste" + str(teste))
+        ENome = sheet.cell(row=teste, column=3)
+        RENome = re.compile(
+            r"""C:\\Users\\TheLastHope\\Desktop\\ADMINISTRAÇÃO DE PESSOAL\\Folha de Pagamento\\Conferências Fopag\\2022\\03\.2022\\Proporcionalidade INSS\\(.+)\sTipo de arquivo"""
+        )
+        CNome = RENome.search(new_name)
+        print(CNome.group(1))
+        ENome.value = str(CNome.group(1))
+        Propor()
 
 
-MesesDoAno = ['Janeiro' , 'Fevereiro' , 'Março', 'Abril' , 'Maio' , 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro','MarÇo']
-Empresas = {'AACD':'60.979.45/0001-11', 'ALBERT EINSTEIN': '60.765.823/0001-30', 'AMIL ASS MEDICA': '29.309.127/0184-69','BP':'61.599.908/0001-58'
-,'CENTRO DE ESTUDOS E PESQUISAS DR JOÃO AMORIM':'66.518.267/0008-50','ESHO':['29.435.005/0026-87', '29.435.005/0045-40']
-,'ESHO EMPR SERV HOSPITAL /SAMARITANO SP':'29.435.005/0099-32','FIDI': '55.401.178/0012-99','FLEURY': 'S/A:60.840.055/0150-82'
-,'FUND. ADIB JATENE':'53.725.560/0001-70','FUNDAÇÃO FACULDADE MEDICINA':'56.577.059/0006-06','FUNDACAO JOSE LUIZ EGYDIO SETUBAL':'61.213.674/0002-40'
-,'Fundação Zerbini':'50.644.053/0001-13','HAT HOSP ALV TAGUATINGA':'08.100.676/0024-55','HCOR':'60.453.024/0003-90'
-,'HOSP. ALVORADA TAGUATINGA':'108.100.676/0024-55','HOSP. MARIO COVAS': '157.571.275/0006-07','Hospital das clinicas':'160.448.040/0001-22'
-,'HOSPITAL SIRIO LIBANÊS':'61.590.410/0001-24','HRIM':'52.803.319/0001-59','IAMSPE':'60.747.318/0001-62','IBCC': '62.932.942/0001-65'
-,'IGESP':'61.442.190/0001-91','IMPAR SERVICOS': '60.884.855/0003-16','INSTITUTO BRASIL SAUDE': '60.884.855/0003-16'
-,'INSTITUTO NACIONAL DE TECNOLOGIA E SAUDE':'09.652.823/0013-00'
-,'Leforte':'21.371.777/0001-32'
-,'NOTRE DAME INTERMEDICA SAUDE S.A.':'44.649.812/0001-38'
-,'REDE D’OR':'28.290.788/0001-37'
-,'OSEL':'18.301.267/0007-70'
-,'PREVENT SENIOR':['00.461.479/0094-62','00.461.479/0010-54']
-,'REDE D’OR SÃO LUIZ S/A':['06.047.087/0038-20','06.047.087/0003-09','28.290.788/0001-37']
-,'SAMARITANO':'29.435.005/0099-32',
-'SANTA CATARINA':'60.922.168/0007-71',
-'Santa Marcelina':'60.742.855/0017-87',
-'São luiz': '06.047.087/0003-09',
-'SECONCI':'61.687.356/0040-46',
-'Sirio':'61.590.410.0001-24',
-'SPDM':['61.699.567/0062-04','61 699 567/0057-47', '61 699 567/ 0057-47'],
-'Zerbini':'50.644.053/0001-13'}
+# Mudar para pasta respondidos
 
-#Baixar os anexos do email
-
-#Mudar para pasta respondidos
-
-#Pegar as informações da imagem SE o arquivo for um PDF
-
-
-def Propor():
+# Pegar as informações da imagem SE o arquivo for um PDF
+def LerOPDF():
+    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
     try:
-        pages = convert_from_path(PDF_file, 500)
+        paginas = convert_from_path(PDF_file, 500)
         image_counter = 1
-        for page in pages:
-            filename = "page_"+str(image_counter)+".jpg"
-            page.save(filename, 'JPEG')
+        for pagina in paginas:
+            filename = "page_" + str(image_counter) + ".jpg"
+            pagina.save(filename, "JPEG")
             image_counter = image_counter + 1
-        filelimit = image_counter-1
+        filelimit = image_counter - 1
         outfile = "out_text.txt"
         f = open(outfile, "a")
         for i in range(1, filelimit + 1):
-            filename = "page_"+str(i)+".jpg"
-            text = str(((pytesseract.image_to_string(Image.open(filename)))))
-            text = text.replace('-\n', '')
+            filename = "page_" + str(i) + ".jpg"
+            text = str(
+                ((pytesseract.image_to_string(Image.open(filename), lang="por")))
+            )
+            text = text.replace("-\n", "")
             f.write(text)
         f.close()
-        print(text)
     except ValueError:
-        print('Error: ValueError Arquivo:' + PDF_file)
-    
-    print('-------------------------------------------')
-    ReCNPJ = re.compile(r'''(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}-\d{2})''')
-#Verificar de quem é o CNPJ
-    ACNPJ = ReCNPJ.search(text)
-    if ACNPJ != None:
-        CNPJ = ACNPJ.group()
-        print(CNPJ)
-        def get_key(val):
-            global CNPJ
-            for key, value in Empresas.items():
-                if len(value) < 8 :
-                    for i in range(len(value)):
-                     if val == value[i]:
-                         return key
-                if val == value:
-                     return key
-        Empresa = get_key(CNPJ)
-        print(Empresa)
+        print("Error: ValueError Arquivo:" + PDF_file)
+    print("-------------------------------------------")
+# Achar o CNPJ da empresa no documento
+def AcharCNPJ():
+        ACNPJ = ReCNPJ.search(text)
+        if ACNPJ is not None:
+            CNPJ = ACNPJ.group()
+            print(CNPJ)
+            def get_key(val):
+                global CNPJ
+                for key, value in Empresas.items():
+                    if len(value) < 8:
+                        for i in range(len(value)):
+                            if val == value[i]:
+                                return key
+                    if val == value:
+                        return key
+            Empresa = get_key(CNPJ)
+            print(Empresa)
+        else:
+            Empresa = "None"
+            CNPJ = "Erro"
+            print("Erro CNPJ")
+# Passar a empresa para o arquivo
+def EscreverCNPJ():
+    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
+    ReCNPJ = re.compile(
+    r"""(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}(\s)?-\d{2})"""
+    )
+    if Empresa is not None:
+        EEmpresa = sheet.cell(row=teste, column=1)
+        EEmpresa.value = Empresa
     else:
-        print('Erro CNPJ')
-#Parte do mês
-    ReMes = re.compile(r'''(\s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro) (a \s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)?''', re.I)
+        EEmpresa = sheet.cell(row=teste, column=1)
+        EEmpresa.value = "Sem empresa"
+    ECNPJ = sheet.cell(row=teste, column=2)
+    ECNPJ.value = CNPJ
+# Parte do mês (Em teste)
+def AcharMes():
+    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
+    ReMes = re.compile(
+        r"""(\s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro) (a \s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)?""",
+        re.I,
+    )
     AMes = ReMes.search(text)
-    print(AMes.group(1))
-    Mes = (AMes.group(1))
-    if Mes.capitalize() in MesesDoAno:
-        if Mes.capitalize() == 'MarÇo':
-            Mes = '2'
-        else:
-            Mes = MesesDoAno.index(Mes.capitalize())+1
-        if len(str(Mes)) != 2:
-            Mes = '0'+str(Mes)
-    else:
-        ReMes = re.compile(r'''(\d{2})''')
-        AMes= ReMes.search(str(Mes))
+    if AMes is not None:
         Mes = AMes.group(1)
-
-#Parte do dinheiro
-    ReDinheiro = re.compile(r'''(\d*?\.?\d+,\d{1,2})''')
-    ADinheiro = ReDinheiro.findall(text)
-    if ADinheiro == []:
-        print('Teto maximo')
     else:
-        DinheiroRE1 = re.compile(r'\.')
-        DinheiroRE2 = re.compile(r',')
-        Dinheiro1 = DinheiroRE1.sub('' , ADinheiro[0])
-        Dinheiro2 = DinheiroRE1.sub('' , ADinheiro[1])
-        Dinheiro1 = DinheiroRE2.sub('.' , Dinheiro1)
-        Dinheiro2 = DinheiroRE2.sub('.' , Dinheiro2)
-        print(Dinheiro1 +' '+ Dinheiro2)
-        if int(float(Dinheiro1)) > int(float(Dinheiro2)):
-            Salario = Dinheiro1
-            INSS = Dinheiro2
+        Mes = "Sem mes"
+    if Mes.capitalize() in MesesDoAno:
+        if Mes.capitalize() == "MarÇo":
+            Mes = "3"
         else:
-            Salario = Dinheiro2
-            INSS = Dinheiro1
-        print('INSS:'+ INSS +' Salario:' + Salario)
-    print('-------------------------------------------')
-#Escrever as informações e salvar
-#Executar o codigo
-print('-------------------------------------------')
-pdffiles = []
-for file in glob.glob(r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS\*.pdf"):
-    pdffiles.append(file)
-teste = 0 
-for i in pdffiles:
-    PDF_file = i
-    teste += 1
-    print('Teste'+str(teste))
-    Propor()
+            Mes = MesesDoAno.index(Mes.capitalize()) + 1
+        if len(str(Mes)) != 2:
+            Mes = "0" + str(Mes)
+    else:
+        ReMes = re.compile(r"""(\d{2})""")
+        AMes = ReMes.search(str(Mes))
+        if AMes is not None:
+            Mes = AMes.group(1)
+        else:
+            Mes = "Sem mes"
+    print(Mes)
+#    Parte do dinheiro
+def AcharDinheiro():
+    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, INSS, Salario
+    ReDinheiro = re.compile(r"""R\$?\s?(\d*\.?\d+?,\d{1,2}|\d*\.?\d+?.\d{1,2})""")
+    ADinheiro = ReDinheiro.findall(text)
+    print(ADinheiro)
+    if ADinheiro == []:
+        print("Teto maximo")
+        INSS = "828,38"
+        Salario = "7087,22"
+    else:
+        try:
+            DinheiroRE1 = re.compile(r"\.")
+            DinheiroRE2 = re.compile(r",")
+            Dinheiro1 = DinheiroRE1.sub("", ADinheiro[0])
+            Dinheiro2 = DinheiroRE1.sub("", ADinheiro[1])
+            Dinheiro1 = DinheiroRE2.sub(".", Dinheiro1)
+            Dinheiro2 = DinheiroRE2.sub(".", Dinheiro2)
+            print(Dinheiro1 + " " + Dinheiro2)
+            if int(float(Dinheiro1)) > int(float(Dinheiro2)):
+                Salario = Dinheiro1
+                INSS = Dinheiro2
+            else:
+                Salario = Dinheiro2
+                INSS = Dinheiro1
+            print("INSS:" + INSS + " Salario:" + Salario)
+        except IndexError:
+            print("Erro no salario")
+            INSS = "Erro"
+            Salario = "Erro"
+def EscreverDinheiro():
+    global INSS, Salario
+    ESalario = sheet.cell(row=teste, column=4)
+    ESalario.value = Salario
+    EINSS = sheet.cell(row=teste, column=5)
+    EINSS.value = INSS
+def Propor():
+    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, INSS, Salario
+    LerOPDF()
+    AcharCNPJ()
+    EscreverCNPJ()
+    AcharDinheiro()
+    EscreverDinheiro()
+    print("-------------------------------------------")
+# Executar o codigo
+def ExecutarPropor():
+    global NumeroDeArquivos, PDF_file, arquivo, teste
+    teste = 1
+    LerESalvarEmail()
+    wb.save("lista.xlsx")
 
-#Erros conhecidos
-#Não consegue processar BP
-#Fundação JOSE precisa de regra especial pra o mês
+
+# Banco De Dados
+MesesDoAno = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+    "MarÇo",
+]
+Empresas = {
+    "HAOC": "60.726.502/0001-26",
+    "AACD": "60.979.45/0001-11",
+    "ALBERT EINSTEIN": ["60.765.823/0001-30", "60.765.823/0027-79"],
+    "AMIL ASS MEDICA": "29.309.127/0184-69",
+    "BP": "61.599.908/0001-58",
+    "CENTRO DE ESTUDOS E PESQUISAS DR JOÃO AMORIM": "66.518.267/0008-50",
+    "ESHO": ["29.435.005/0026-87", "29.435.005/0045-40"],
+    "ESHO EMPR SERV HOSPITAL /SAMARITANO SP": "29.435.005/0099-32",
+    "FIDI": "55.401.178/0012-99",
+    "FLEURY": "S/A:60.840.055/0150-82",
+    "FUND. ADIB JATENE": "53.725.560/0001-70",
+    "FUNDAÇÃO FACULDADE MEDICINA": "56.577.059/0006-06",
+    "FUNDACAO JOSE LUIZ EGYDIO SETUBAL": "61.213.674/0002-40",
+    "Fundação Zerbini": "50.644.053/0001-13",
+    "HAT HOSP ALV TAGUATINGA": "08.100.676/0024-55",
+    "HCOR": "60.453.024/0003-90",
+    "HOSP. ALVORADA TAGUATINGA": "108.100.676/0024-55",
+    "HOSP. MARIO COVAS": "157.571.275/0006-07",
+    "Hospital das clinicas": ["60.765.823/0001-30", "160.448.040/0001-22"],
+    "HOSPITAL SIRIO LIBANÊS": "61.590.410/0001-24",
+    "HRIM": "52.803.319/0001-59",
+    "IAMSPE": "60.747.318/0001-62",
+    "IBCC": "62.932.942/0001-65",
+    "IGESP": "61.442.190/0001-91",
+    "IMPAR SERVICOS": "60.884.855/0003-16",
+    "INSTITUTO BRASIL SAUDE": "60.884.855/0003-16",
+    "INSTITUTO NACIONAL DE TECNOLOGIA E SAUDE": "09.652.823/0013-00",
+    "Leforte": "21.371.777/0001-32",
+    "NOTRE DAME INTERMEDICA SAUDE S.A.": "44.649.812/0001-38",
+    "REDE D’OR": "28.290.788/0001-37",
+    "OSEL": "18.301.267/0007-70",
+    "PREVENT SENIOR": ["00.461.479/0094-62", "00.461.479/0010-54"],
+    "REDE D’OR SÃO LUIZ S/A": [
+        "06.047.087/0038-20",
+        "06.047.087/0003-09",
+        "28.290.788/0001-37",
+    ],
+    "SAMARITANO": "29.435.005/0099-32",
+    "SANTA CATARINA": "60.922.168/0007-71",
+    "Santa Marcelina": "60.742.855/0017-87",
+    "São luiz": "06.047.087/0003-09",
+    "SECONCI": "61.687.356/0040-46",
+    "Sirio": "61.590.410.0001-24",
+    "SPDM": ["61.699.567/0062-04", "61 699 567/0057-47", "61 699 567/ 0057-47"],
+    "Zerbini": "50.644.053/0001-13",
+    "Iamspe": "60.747.318-0001-62",
+    "Central de convênios/OSS": "57571275/0004-45",
+    "Rede Moriah": "19.056.055/0001-41",
+}
+# EXECUTAR O PROGRAMA
+ExecutarPropor()
+# Erros conhecidos
