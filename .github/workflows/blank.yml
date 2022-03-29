@@ -1,5 +1,4 @@
 # Escreva o seu código aqui :-)
-# Escreva o seu código aqui :-)
 import re
 from PIL import Image
 import pytesseract
@@ -11,7 +10,7 @@ import win32com.client
 import openpyxl
 
 os.chdir(
-    r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+    r"C:\Users\*\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
 )
 wb = openpyxl.load_workbook("lista.xlsx")
 # Abrir o inbox
