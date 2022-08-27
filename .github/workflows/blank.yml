@@ -1,4 +1,5 @@
 # Escreva o seu código aqui :-)
+# Escreva o seu código aqui :-)
 import re
 from PIL import Image
 import pytesseract
@@ -10,12 +11,12 @@ import win32com.client
 import openpyxl
 
 os.chdir(
-    r"C:\Users\*\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+    r"C:\Users\*\Desktop\PROPOR"
 )
 wb = openpyxl.load_workbook("lista.xlsx")
 # Abrir o inbox
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.Folders("Proporcionalidade INSS").Folders[12]
+inbox = outlook.Folders("Proporcionalidade INSS").Folders['Inbox']
 messages = inbox.Items
 print(messages)
 message = messages.GetFirst()
@@ -35,7 +36,7 @@ EINSS = sheet.cell(row=1, column=5)
 EINSS.value = "INSS"
 # Baixar os anexos do email
 def LerESalvarEmail():
-    global inbox, message, messages, teste, PDF_file
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, empresa
     while True:
         try:
             message = messages.GetNext()
@@ -43,17 +44,17 @@ def LerESalvarEmail():
             arquivo = arquivos.item(1)
             NomeDoArquivo = str(arquivo).lower()
             arquivo.SaveASFile(
-                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                r"C:\Users\*\Desktop\PROPOR"
                 + "\\"
                 + NomeDoArquivo
             )
             old_name = (
-                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                r"C:\Users\*\Desktop\PROPOR"
                 + "\\"
                 + NomeDoArquivo
             )
             new_name = (
-                r"C:\Users\TheLastHope\Desktop\ADMINISTRAÇÃO DE PESSOAL\Folha de Pagamento\Conferências Fopag\2022\03.2022\Proporcionalidade INSS"
+                r"C:\Users\*\Desktop\PROPOR"
                 + "\\"
                 + str(message.sender)
                 + " Tipo de arquivo "
@@ -69,19 +70,22 @@ def LerESalvarEmail():
         print("Teste" + str(teste))
         ENome = sheet.cell(row=teste, column=3)
         RENome = re.compile(
-            r"""C:\\Users\\TheLastHope\\Desktop\\ADMINISTRAÇÃO DE PESSOAL\\Folha de Pagamento\\Conferências Fopag\\2022\\03\.2022\\Proporcionalidade INSS\\(.+)\sTipo de arquivo"""
+            r"""C:\Users\*\Desktop\PROPOR\\(.+)\sTipo de arquivo"""
         )
         CNome = RENome.search(new_name)
         print(CNome.group(1))
         ENome.value = str(CNome.group(1))
-        Propor()
+        nome, extensão = os.path.splitext(PDF_file)
+        print(nome +' e '+ extensão)
+        if extensão == '.pdf':
+            Propor()
 
 
 # Mudar para pasta respondidos
 
 # Pegar as informações da imagem SE o arquivo for um PDF
 def LerOPDF():
-    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa, Salario, INSS
     try:
         paginas = convert_from_path(PDF_file, 500)
         image_counter = 1
@@ -105,6 +109,10 @@ def LerOPDF():
     print("-------------------------------------------")
 # Achar o CNPJ da empresa no documento
 def AcharCNPJ():
+        global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa, Salario, INSS
+        ReCNPJ = re.compile(
+        r"""(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}(\s)?-\d{2})"""
+        )
         ACNPJ = ReCNPJ.search(text)
         if ACNPJ is not None:
             CNPJ = ACNPJ.group()
@@ -126,10 +134,7 @@ def AcharCNPJ():
             print("Erro CNPJ")
 # Passar a empresa para o arquivo
 def EscreverCNPJ():
-    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
-    ReCNPJ = re.compile(
-    r"""(\d{2}(.|\s)?\d{3}(.|\s)?\d{3}(/|.)(\s)?\d{4}(\s)?-\d{2})"""
-    )
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa, Salario, INSS
     if Empresa is not None:
         EEmpresa = sheet.cell(row=teste, column=1)
         EEmpresa.value = Empresa
@@ -140,7 +145,7 @@ def EscreverCNPJ():
     ECNPJ.value = CNPJ
 # Parte do mês (Em teste)
 def AcharMes():
-    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa, Salario, INSS
     ReMes = re.compile(
         r"""(\s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro) (a \s\d{2}/\d{4}|Janeiro|Fevereiro|Março|MARÇO|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)?""",
         re.I,
@@ -167,7 +172,7 @@ def AcharMes():
     print(Mes)
 #    Parte do dinheiro
 def AcharDinheiro():
-    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, INSS, Salario
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa, Salario, INSS
     ReDinheiro = re.compile(r"""R\$?\s?(\d*\.?\d+?,\d{1,2}|\d*\.?\d+?.\d{1,2})""")
     ADinheiro = ReDinheiro.findall(text)
     print(ADinheiro)
@@ -202,7 +207,7 @@ def EscreverDinheiro():
     EINSS = sheet.cell(row=teste, column=5)
     EINSS.value = INSS
 def Propor():
-    global NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, INSS, Salario
+    global inbox, message, messages, teste, PDF_file, NumeroDeArquivos, sheet, teste, PDF_file, CNPJ, ReCNPJ, text, Empresa
     LerOPDF()
     AcharCNPJ()
     EscreverCNPJ()
